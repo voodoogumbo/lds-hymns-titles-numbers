@@ -1,0 +1,52 @@
+{
+  "name": "lds-hymns-titles-numbers",
+  "version": "1.1.0",
+  "description": "Hymn numbers and titles from the hymnbooks of The Church of Jesus Christ of Latter-day Saints, by language",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./en": "./languages/en/hymns.json",
+    "./es": "./languages/es/himnos.json",
+    "./fr": "./languages/fr/cantiques.json",
+    "./languages/*": "./languages/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "languages/**/*.json"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voodoogumbo/lds-hymns-titles-numbers.git"
+  },
+  "keywords": [
+    "lds",
+    "latter-day saints",
+    "hymns",
+    "hymnbook",
+    "himnos",
+    "cantiques",
+    "church",
+    "music",
+    "titles",
+    "numbers",
+    "multilingual"
+  ],
+  "author": "William Guthriel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/voodoogumbo/lds-hymns-titles-numbers/issues"
+  },
+  "homepage": "https://github.com/voodoogumbo/lds-hymns-titles-numbers#readme",
+  "engines": {
+    "node": ">=18"
+  }
+}
