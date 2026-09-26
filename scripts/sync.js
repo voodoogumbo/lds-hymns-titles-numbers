@@ -19,6 +19,7 @@ const LANGUAGES = {
   en: { api: 'eng', file: 'languages/en/hymns.json' },
   es: { api: 'spa', file: 'languages/es/himnos.json' },
   fr: { api: 'fra', file: 'languages/fr/cantiques.json' },
+  pt: { api: 'por', file: 'languages/pt/hinos.json' },
 };
 
 const BOOKS = {
@@ -42,6 +43,7 @@ const LINKS = [
   { lang: 'es', page: 'brightly-beams-our-fathers-mercy-men', to: 'brightly-beams-our-fathers-mercy-mens-choir' },
   { lang: 'fr', page: 'when-faith-endures-mozart', to: 'when-faith-endures', note: 'Different tune (Mozart).' },
   { lang: 'fr', page: 'brightly-beams-our-fathers-mercy', to: 'brightly-beams-our-fathers-mercy-mens-choir', note: "Congregational arrangement (the English is for men's choir)." },
+  { lang: 'pt', page: 'angry-words-o-let-them-never', to: 'angry-words-oh-let-them-never' },
 ];
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
@@ -130,7 +132,7 @@ function buildCrosswalk(books) {
   for (const book of Object.keys(BOOKS)) {
     const entries = new Map(); // page id → entry
     const entryFor = (id) => {
-      if (!entries.has(id)) entries.set(id, { id, book, en: null, es: null, fr: null });
+      if (!entries.has(id)) entries.set(id, { id, book, ...Object.fromEntries(Object.keys(LANGUAGES).map((l) => [l, null])) });
       return entries.get(id);
     };
     for (const lang of Object.keys(LANGUAGES)) {
@@ -148,8 +150,11 @@ function buildCrosswalk(books) {
     for (const link of LINKS) {
       if (book === 'hymns' && !entries.get(link.to)?.[link.lang]) throw new Error(`Link ${link.lang} ${link.page} was not applied`);
     }
-    // Order by English number, then Spanish, then French, for entries missing earlier languages.
-    const sortKey = (e) => (e.en ? [0, e.en] : e.es ? [1, e.es] : [2, e.fr]);
+    // Order by English number, then by the next language's number for entries missing earlier languages.
+    const sortKey = (e) => {
+      const i = Object.keys(LANGUAGES).findIndex((l) => e[l]);
+      return [i, e[Object.keys(LANGUAGES)[i]]];
+    };
     crosswalk.push(
       ...[...entries.values()].sort((a, b) => {
         const [ga, na] = sortKey(a);

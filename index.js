@@ -4,6 +4,7 @@ const hymns = {
   en: require('./languages/en/hymns.json'),
   es: require('./languages/es/himnos.json'),
   fr: require('./languages/fr/cantiques.json'),
+  pt: require('./languages/pt/hinos.json'),
 };
 
 const crosswalk = require('./crosswalk.json');
@@ -14,6 +15,7 @@ const GOSPEL_LIBRARY = {
   en: 'eng',
   es: 'spa',
   fr: 'fra',
+  pt: 'por',
 };
 
 const BOOK_PATHS = {

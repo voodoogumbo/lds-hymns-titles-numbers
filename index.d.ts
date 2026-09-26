@@ -1,4 +1,4 @@
-export type Language = 'en' | 'es' | 'fr';
+export type Language = 'en' | 'es' | 'fr' | 'pt';
 
 export interface Hymn {
   /** The number as printed, e.g. "30", or "127a" for a lettered variant. */
@@ -14,11 +14,12 @@ export type Book = 'hymns' | 'hymns-for-home-and-church';
 export interface CrosswalkEntry {
   /** The Church's page id for the hymn, e.g. "the-morning-breaks". */
   id: string;
-  /** "hymns" for the current hymnbooks (1985 / 1992 / 1993), or the new hymnbook. */
+  /** "hymns" for the current hymnbooks, or the new hymnbook. */
   book: Book;
   en: string | null;
   es: string | null;
   fr: string | null;
+  pt: string | null;
   /** Page id for a language whose version lives on a different page (another tune or arrangement). */
   pages?: Partial<Record<Language, string>>;
   /** How a language's version differs, e.g. "Different tune (HARRISON)." */

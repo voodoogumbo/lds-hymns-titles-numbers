@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hymn Number Finder</title>
+<meta name="description" content="Find any hymn's number in English, Spanish, French and Portuguese hymnbooks of The Church of Jesus Christ of Latter-day Saints.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6b6b70;
+    --line: #e4e2dc;
+    --accent: #1f4e8c;
+    --accent-soft: #e6eef8;
+    --note: #8a5a00;
+    --radius: 12px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416;
+      --surface: #1e1e21;
+      --text: #ececef;
+      --muted: #9a9aa2;
+      --line: #313136;
+      --accent: #8db4ec;
+      --accent-soft: #23304a;
+      --note: #e3b35c;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .lede { color: var(--muted); margin: 0 0 24px; }
+  .controls {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--bg);
+    padding: 12px 0;
+    margin: 0 0 8px;
+  }
+  input[type="search"] {
+    width: 100%;
+    font: inherit;
+    font-size: 1.125rem;
+    padding: 12px 14px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    outline: none;
+  }
+  input[type="search"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  fieldset { border: 0; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  legend { float: left; color: var(--muted); font-size: 0.875rem; margin-right: 4px; padding: 0; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--surface); }
+  .seg label { position: relative; }
+  .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .seg span { display: block; padding: 4px 12px; font-size: 0.875rem; cursor: pointer; }
+  .seg input:checked + span { background: var(--accent); color: var(--bg); }
+  .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .count { color: var(--muted); font-size: 0.875rem; margin: 4px 0 12px; }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  .badge {
+    display: inline-block; font-size: 0.75rem; color: var(--accent);
+    background: var(--accent-soft); border-radius: 999px; padding: 1px 8px; margin-bottom: 4px;
+  }
+  .row { display: grid; grid-template-columns: 2.25rem 3.5rem 1fr; gap: 8px; align-items: baseline; padding: 3px 0; }
+  .lang { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .num { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .row.primary .num { color: var(--accent); }
+  .title a { color: inherit; text-decoration: none; }
+  .title a:hover, .title a:focus-visible { text-decoration: underline; color: var(--accent); }
+  .missing { color: var(--muted); font-style: italic; font-size: 0.9rem; }
+  .note { display: block; font-size: 0.8125rem; color: var(--note); }
+  .empty { color: var(--muted); text-align: center; padding: 32px 0; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 0.875rem; }
+  footer a { color: var(--accent); }
+  @media (max-width: 420px) {
+    .row { grid-template-columns: 2rem 3rem 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Hymn Number Finder</h1>
+    <p class="lede">Find the number of any hymn in the English, Spanish, French and Portuguese hymnbooks. The numbers are different in each language.</p>
+  </header>
+
+  <div class="controls">
+    <input id="q" type="search" autocomplete="off" spellcheck="false" autofocus
+           placeholder="Hymn number or title, e.g. 136 or redeemer" aria-label="Hymn number or title">
+    <fieldset>
+      <legend>Look up numbers in</legend>
+      <div class="seg" id="langs"></div>
+    </fieldset>
+  </div>
+
+  <p class="count" id="count" aria-live="polite">Loading…</p>
+  <ol id="results"></ol>
+
+  <footer>
+    <p>Titles and links come from the Church's Gospel Library. Each title links to the official page with lyrics, sheet music and recordings.
+      Numbers 1001 and up are from the new <em>Hymns—For Home and Church</em> and are the same in every language.</p>
+    <p>Unofficial project, not affiliated with The Church of Jesus Christ of Latter-day Saints.
+      Data and code: <a href="https://github.com/voodoogumbo/lds-hymns-titles-numbers">github.com/voodoogumbo/lds-hymns-titles-numbers</a></p>
+  </footer>
+</div>
+
+<script>
+'use strict';
+
+const LANGS = [
+  { code: 'en', name: 'English', file: 'languages/en/hymns.json', gl: 'eng' },
+  { code: 'es', name: 'Español', file: 'languages/es/himnos.json', gl: 'spa' },
+  { code: 'fr', name: 'Français', file: 'languages/fr/cantiques.json', gl: 'fra' },
+  { code: 'pt', name: 'Português', file: 'languages/pt/hinos.json', gl: 'por' },
+];
+const BOOK_PATHS = {
+  hymns: 'https://www.churchofjesuschrist.org/study/manual/hymns/',
+  'hymns-for-home-and-church': 'https://www.churchofjesuschrist.org/study/music/hymns-for-home-and-church/',
+};
+
+const $ = (id) => document.getElementById(id);
+const escape = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const normalize = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  .replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+
+const store = {
+  get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(key, value); } catch {} },
+};
+
+let entries = [];
+let numberLang = LANGS.some((l) => l.code === store.get('numberLang')) ? store.get('numberLang') : 'en';
+
+function renderLangPicker() {
+  $('langs').innerHTML = LANGS.map((l) => `
+    <label><input type="radio" name="lang" value="${l.code}" ${l.code === numberLang ? 'checked' : ''}>
+    <span title="${l.name}">${l.name}</span></label>`).join('');
+  $('langs').addEventListener('change', (e) => {
+    numberLang = e.target.value;
+    store.set('numberLang', numberLang);
+    update();
+  });
+}
+
+function card(entry) {
+  const badge = entry.book === 'hymns-for-home-and-church' ? '<span class="badge">Hymns—For Home and Church</span>' : '';
+  const rows = LANGS.map((l) => {
+    const h = entry[l.code];
+    const primary = l.code === numberLang ? ' primary' : '';
+    if (!h) {
+      return `<div class="row${primary}"><span class="lang">${l.code}</span><span class="num">—</span><span class="missing">Not in this hymnbook</span></div>`;
+    }
+    const note = entry.notes?.[l.code] ? `<span class="note">${escape(entry.notes[l.code])}</span>` : '';
+    return `<div class="row${primary}"><span class="lang">${l.code}</span><span class="num">${escape(h.id)}</span>
+      <span class="title" lang="${l.code}"><a href="${h.url}" target="_blank" rel="noopener">${escape(h.title)}</a>${note}</span></div>`;
+  }).join('');
+  return `<li class="card">${badge}${rows}</li>`;
+}
+
+function search(query) {
+  const q = query.trim();
+  if (!q) return entries;
+  if (/^\d+[a-z]?$/i.test(q)) {
+    return entries.filter((e) => e[numberLang]?.id.toLowerCase() === q.toLowerCase());
+  }
+  const needle = normalize(q);
+  return entries.filter((e) => e.haystack.includes(needle));
+}
+
+function update() {
+  const query = $('q').value;
+  const found = search(query);
+  const shown = found.slice(0, 200);
+  $('results').innerHTML = shown.map(card).join('');
+  const lang = LANGS.find((l) => l.code === numberLang).name;
+  if (!found.length) {
+    $('count').textContent = '';
+    $('results').innerHTML = `<li class="empty">${/^\d/.test(query.trim())
+      ? `No hymn ${escape(query.trim())} in the ${escape(lang)} hymnbook.`
+      : 'No hymns match that title.'}</li>`;
+  } else {
+    $('count').textContent = query.trim()
+      ? `${found.length} ${found.length === 1 ? 'hymn' : 'hymns'}${found.length > shown.length ? `, showing the first ${shown.length}` : ''}`
+      : `All ${found.length} hymns${found.length > shown.length ? `. Showing the first ${shown.length}; search to narrow down` : ''}`;
+  }
+  // Keep the search in the URL so a lookup can be shared.
+  history.replaceState(null, '', query.trim() ? `#${encodeURIComponent(query.trim())}` : location.pathname);
+}
+
+async function load() {
+  const [crosswalk, ...tables] = await Promise.all(
+    ['crosswalk.json', ...LANGS.map((l) => l.file)].map((f) => fetch(f).then((r) => {
+      if (!r.ok) throw new Error(`${f}: HTTP ${r.status}`);
+      return r.json();
+    })),
+  );
+  entries = crosswalk.map((raw) => {
+    const entry = { book: raw.book, notes: raw.notes };
+    const titles = [];
+    LANGS.forEach((l, i) => {
+      const id = raw[l.code];
+      if (!id) return;
+      const page = raw.pages?.[l.code] ?? raw.id;
+      entry[l.code] = { id, title: tables[i][id], url: `${BOOK_PATHS[raw.book]}${page}?lang=${l.gl}` };
+      titles.push(tables[i][id]);
+    });
+    entry.haystack = normalize(titles.join(' | '));
+    return entry;
+  });
+  const initial = decodeURIComponent(location.hash.slice(1));
+  if (initial) $('q').value = initial;
+  update();
+}
+
+renderLangPicker();
+$('q').addEventListener('input', update);
+load().catch((err) => {
+  $('count').textContent = `Couldn't load the hymn data (${err.message}).`;
+});
+</script>
+</body>
+</html>

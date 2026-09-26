@@ -10,6 +10,7 @@ const files = {
   en: 'languages/en/hymns.json',
   es: 'languages/es/himnos.json',
   fr: 'languages/fr/cantiques.json',
+  pt: 'languages/pt/hinos.json',
 };
 
 for (const lang of languages) {
@@ -117,6 +118,8 @@ test('translate', () => {
   assert.equal(translate(204, 'en', 'fr').id, '127a');
   assert.equal(translate('127b', 'fr', 'en'), null);
   assert.equal(translate(59, 'es', 'en'), null);
+  assert.equal(translate(136, 'en', 'pt').title, 'Eu Sei Que Vive Meu Senhor');
+  assert.equal(translate(152, 'es', 'pt').id, '138');
 
   const harrison = translate(83, 'en', 'es');
   assert.equal(harrison.id, '39');

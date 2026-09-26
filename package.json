@@ -12,6 +12,7 @@
     "./en": "./languages/en/hymns.json",
     "./es": "./languages/es/himnos.json",
     "./fr": "./languages/fr/cantiques.json",
+    "./pt": "./languages/pt/hinos.json",
     "./crosswalk": "./crosswalk.json",
     "./languages/*": "./languages/*",
     "./package.json": "./package.json"
@@ -37,13 +38,14 @@
     "hymnbook",
     "himnos",
     "cantiques",
+    "hinos",
     "church",
     "music",
     "titles",
     "numbers",
     "multilingual"
   ],
-  "author": "William Guthriel",
+  "author": "Will Grigoratos",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/voodoogumbo/lds-hymns-titles-numbers/issues"
