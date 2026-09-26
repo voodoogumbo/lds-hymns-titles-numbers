@@ -1,0 +1,43 @@
+name: check for new hymns
+
+# Weekly: compare the data with the Church's Gospel Library and open an issue if it's out of date.
+on:
+  schedule:
+    - cron: '17 14 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sync from Gospel Library
+        run: npm run sync
+      - name: Open an issue if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "Data is up to date."
+            exit 0
+          fi
+          title="Hymn data is out of date"
+          if [ -n "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[].number')" ]; then
+            echo "An issue is already open."
+            exit 0
+          fi
+          {
+            echo "The weekly check found changes on churchofjesuschrist.org. Run \`npm run sync\`, review the diff, and commit."
+            echo
+            echo '```diff'
+            git diff --unified=0 -- languages | grep '^[+-] ' | head -100
+            echo '```'
+          } > body.md
+          gh issue create --title "$title" --body-file body.md

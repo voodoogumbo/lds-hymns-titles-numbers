@@ -12,16 +12,19 @@
     "./en": "./languages/en/hymns.json",
     "./es": "./languages/es/himnos.json",
     "./fr": "./languages/fr/cantiques.json",
+    "./crosswalk": "./crosswalk.json",
     "./languages/*": "./languages/*",
     "./package.json": "./package.json"
   },
   "files": [
     "index.js",
     "index.d.ts",
+    "crosswalk.json",
     "languages/**/*.json"
   ],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "sync": "node scripts/sync.js"
   },
   "repository": {
     "type": "git",

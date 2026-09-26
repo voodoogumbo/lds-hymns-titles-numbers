@@ -6,7 +6,35 @@ const hymns = {
   fr: require('./languages/fr/cantiques.json'),
 };
 
+const crosswalk = require('./crosswalk.json');
+
 const languages = Object.keys(hymns);
+
+const GOSPEL_LIBRARY = {
+  en: 'eng',
+  es: 'spa',
+  fr: 'fra',
+};
+
+const BOOK_PATHS = {
+  hymns: 'https://www.churchofjesuschrist.org/study/manual/hymns/',
+  'hymns-for-home-and-church': 'https://www.churchofjesuschrist.org/study/music/hymns-for-home-and-church/',
+};
+
+let entriesByLang;
+
+// lang → Map(hymn id → crosswalk entry), built on first use.
+function entryFor(id, lang) {
+  if (!entriesByLang) {
+    entriesByLang = Object.fromEntries(languages.map((l) => [l, new Map()]));
+    for (const entry of crosswalk) {
+      for (const l of languages) {
+        if (entry[l]) entriesByLang[l].set(entry[l], entry);
+      }
+    }
+  }
+  return entriesByLang[lang].get(String(id));
+}
 
 function table(lang) {
   const data = hymns[lang];
@@ -55,4 +83,24 @@ function search(query, lang = 'en') {
   return list(lang).filter((hymn) => normalize(hymn.title).includes(needle));
 }
 
-module.exports = { hymns, languages, getHymn, list, search };
+// The same hymn in another language. A note explains when the tune or arrangement differs.
+function translate(id, from, to) {
+  table(from);
+  table(to);
+  const entry = entryFor(id, from);
+  if (!entry || !entry[to]) return null;
+  const hymn = getHymn(entry[to], to);
+  const note = entry.notes?.[to] ?? entry.notes?.[from];
+  return note ? { ...hymn, note } : hymn;
+}
+
+// The hymn's page on churchofjesuschrist.org, with lyrics, sheet music and recordings.
+function url(id, lang = 'en') {
+  table(lang);
+  const entry = entryFor(id, lang);
+  if (!entry) return null;
+  const page = entry.pages?.[lang] ?? entry.id;
+  return `${BOOK_PATHS[entry.book]}${page}?lang=${GOSPEL_LIBRARY[lang]}`;
+}
+
+module.exports = { hymns, crosswalk, languages, getHymn, list, search, translate, url };
